@@ -28,14 +28,28 @@ ASTify is a GitHub Action that reads the `git diff` of a pull request, parses th
   with:
     fetch-depth: 0
 
+# AStify is a private repository, so the default GITHUB_TOKEN can't resolve
+# `uses: Evangelikcaos/AStify@v1` from your own workflow — GitHub only lets
+# a workflow pull an action straight from another repo's tag when that repo
+# is public. As a collaborator, check it out explicitly with a token that
+# has read access instead, then point `uses:` at the local checkout path:
+- uses: actions/checkout@v4
+  with:
+    repository: Evangelikcaos/AStify
+    ref: v1
+    token: ${{ secrets.ASTIFY_TOKEN }}
+    path: .github/actions/astify
+
 - name: Prune the diff with ASTify
   id: astify
-  uses: Evangelikcaos/AStify@v1
+  uses: ./.github/actions/astify
   with:
     github-token: ${{ secrets.GITHUB_TOKEN }}
 
 - run: echo "Reduction: ${{ steps.astify.outputs.reduction-percentage }}%"
 ```
+
+`ASTIFY_TOKEN` is a personal access token (classic, `repo` scope, or fine-grained with read access to this repo) created on **your own** GitHub account after you've been added as a collaborator — add it as a secret in the repository that runs this workflow. It only needs to read the AStify repo, not write to it.
 
 ## What's included
 
